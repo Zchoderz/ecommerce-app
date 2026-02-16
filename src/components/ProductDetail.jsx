@@ -81,7 +81,10 @@ function ProductDetail() {
 
             <div className="product-rating">
               <div className="stars">{renderStars(product.rating)}</div>
-              <span className="rating-text">{product.rating} ({product.reviews} reviews)</span>
+              <span className="rating-text">
+                {product.rating}{' '}
+                ({Array.isArray(product.reviews) ? product.reviews.length : 0} reviews)
+              </span>
             </div>
 
             <div className="product-price-detail">

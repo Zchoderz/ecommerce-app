@@ -28,6 +28,26 @@ class ErrorBoundary extends React.Component {
         }}>
           <h2>Something went wrong</h2>
           <p>Please refresh the page or try again later.</p>
+
+          {this.state.error && (
+            <div
+              style={{
+                marginTop: '1rem',
+                maxWidth: '600px',
+                textAlign: 'left',
+                background: '#fee2e2',
+                color: '#991b1b',
+                padding: '0.75rem 1rem',
+                borderRadius: '8px',
+                fontSize: '0.9rem',
+                wordBreak: 'break-word',
+              }}
+            >
+              <strong>Error:</strong>{' '}
+              <code>{this.state.error.toString()}</code>
+            </div>
+          )}
+
           <button
             onClick={() => window.location.reload()}
             className="btn-primary"

@@ -38,7 +38,7 @@ function ProductCard({ product, addToCart }) {
         {product.rating && (
           <div className="product-rating-card">
             {renderStars(product.rating)}
-            <span>({product.reviews})</span>
+            <span>({Array.isArray(product.reviews) ? product.reviews.length : 0})</span>
           </div>
         )}
         <p className="product-description">{product.description}</p>
