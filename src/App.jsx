@@ -10,6 +10,7 @@ import Wishlist from './components/Wishlist'
 import OrderHistory from './components/OrderHistory'
 import Account from './components/Account'
 import Toast from './components/Toast'
+import ErrorBoundary from './components/ErrorBoundary'
 import { useApp } from './context/AppContext'
 
 function AppContent() {
@@ -27,6 +28,12 @@ function AppContent() {
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/orders" element={<OrderHistory />} />
         <Route path="/account" element={<Account />} />
+        <Route path="*" element={
+          <div className="container" style={{ padding: '2rem', textAlign: 'center' }}>
+            <h2>404 - Page Not Found</h2>
+            <p>The page you're looking for doesn't exist.</p>
+          </div>
+        } />
       </Routes>
       {toast && <Toast toast={toast} />}
     </div>
@@ -35,9 +42,11 @@ function AppContent() {
 
 function App() {
   return (
-    <AppProvider>
-      <AppContent />
-    </AppProvider>
+    <ErrorBoundary>
+      <AppProvider>
+        <AppContent />
+      </AppProvider>
+    </ErrorBoundary>
   )
 }
 
