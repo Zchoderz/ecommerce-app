@@ -1,10 +1,14 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
+import { useApp } from '../context/AppContext'
+import { discountCodes } from '../data/products'
 
-function Checkout({ cartItems, totalPrice }) {
+function Checkout() {
+  const { cartItems, getTotalPrice, placeOrder, user } = useApp()
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
+    name: user?.name || '',
+    email: user?.email || '',
     address: '',
     city: '',
     zipCode: '',
@@ -12,7 +16,24 @@ function Checkout({ cartItems, totalPrice }) {
     expiryDate: '',
     cvv: ''
   })
+  const [discountCode, setDiscountCode] = useState('')
+  const [appliedDiscount, setAppliedDiscount] = useState(0)
+  const [discountError, setDiscountError] = useState('')
   const [orderPlaced, setOrderPlaced] = useState(false)
+  const [orderId, setOrderId] = useState(null)
+
+  const priceDetails = getTotalPrice(appliedDiscount)
+
+  const handleApplyDiscount = () => {
+    const code = discountCode.toUpperCase()
+    if (discountCodes[code]) {
+      setAppliedDiscount(discountCodes[code])
+      setDiscountError('')
+    } else {
+      setDiscountError('Invalid discount code')
+      setAppliedDiscount(0)
+    }
+  }
 
   const handleChange = (e) => {
     setFormData({
@@ -23,7 +44,19 @@ function Checkout({ cartItems, totalPrice }) {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    // In a real app, you would send this data to a backend
+    const orderData = {
+      items: cartItems,
+      shipping: formData,
+      payment: {
+        cardNumber: formData.cardNumber.slice(-4),
+        expiryDate: formData.expiryDate
+      },
+      subtotal: priceDetails.subtotal,
+      discount: priceDetails.discount,
+      total: priceDetails.total
+    }
+    const id = placeOrder(orderData)
+    setOrderId(id)
     setOrderPlaced(true)
   }
 
@@ -33,9 +66,12 @@ function Checkout({ cartItems, totalPrice }) {
         <div className="container">
           <div className="order-success">
             <h2>✅ Order Placed Successfully!</h2>
-            <p>Thank you for your purchase. Your order number is #{Math.floor(Math.random() * 1000000)}</p>
+            <p>Thank you for your purchase. Your order number is #{orderId}</p>
             <p>You will receive a confirmation email shortly.</p>
-            <Link to="/" className="btn-primary">Continue Shopping</Link>
+            <div className="order-success-actions">
+              <Link to="/orders" className="btn-primary">View Orders</Link>
+              <Link to="/" className="btn-secondary">Continue Shopping</Link>
+            </div>
           </div>
         </div>
       </div>
@@ -105,6 +141,42 @@ function Checkout({ cartItems, totalPrice }) {
             </div>
 
             <div className="form-section">
+              <h3>Discount Code</h3>
+              <div className="discount-input-group">
+                <input
+                  type="text"
+                  placeholder="Enter discount code"
+                  value={discountCode}
+                  onChange={(e) => setDiscountCode(e.target.value)}
+                  className="discount-input"
+                />
+                {appliedDiscount > 0 ? (
+                  <button
+                    type="button"
+                    onClick={() => { setDiscountCode(''); setAppliedDiscount(0); setDiscountError('') }}
+                    className="discount-remove-btn"
+                  >
+                    Remove
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleApplyDiscount}
+                    className="discount-apply-btn"
+                  >
+                    Apply
+                  </button>
+                )}
+              </div>
+              {discountError && <p className="discount-error">{discountError}</p>}
+              {appliedDiscount > 0 && (
+                <p className="discount-applied">
+                  {appliedDiscount}% discount applied!
+                </p>
+              )}
+            </div>
+
+            <div className="form-section">
               <h3>Payment Information</h3>
               <div className="form-group">
                 <label>Card Number</label>
@@ -170,15 +242,21 @@ function Checkout({ cartItems, totalPrice }) {
             <div className="order-total">
               <div className="summary-row">
                 <span>Subtotal:</span>
-                <span>${totalPrice.toFixed(2)}</span>
+                <span>${priceDetails.subtotal.toFixed(2)}</span>
               </div>
+              {appliedDiscount > 0 && (
+                <div className="summary-row discount-row">
+                  <span>Discount ({appliedDiscount}%):</span>
+                  <span>-${priceDetails.discount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="summary-row">
                 <span>Shipping:</span>
                 <span>Free</span>
               </div>
               <div className="summary-row total">
                 <span>Total:</span>
-                <span>${totalPrice.toFixed(2)}</span>
+                <span>${priceDetails.total.toFixed(2)}</span>
               </div>
             </div>
           </div>

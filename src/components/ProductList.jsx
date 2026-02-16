@@ -1,18 +1,35 @@
 import { useState } from 'react'
 import ProductCard from './ProductCard'
-import { categories } from '../data/products'
+import { categories, products } from '../data/products'
+import { useApp } from '../context/AppContext'
 
-function ProductList({ products, addToCart }) {
+function ProductList() {
+  const { addToCart } = useApp()
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const [searchQuery, setSearchQuery] = useState('')
 
-  const filteredProducts = selectedCategory === 'All'
-    ? products
-    : products.filter(product => product.category === selectedCategory)
+  const filteredProducts = products.filter(product => {
+    const matchesCategory = selectedCategory === 'All' || product.category === selectedCategory
+    const matchesSearch = searchQuery === '' || 
+      product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchQuery.toLowerCase())
+    return matchesCategory && matchesSearch
+  })
 
   return (
     <div className="product-list-container">
       <div className="container">
         <h2 className="page-title">Our Products</h2>
+        
+        <div className="search-filter-bar">
+          <input
+            type="text"
+            placeholder="Search products..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="product-search-input"
+          />
+        </div>
         
         <div className="category-filter">
           {categories.map(category => (
