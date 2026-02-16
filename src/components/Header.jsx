@@ -47,7 +47,9 @@ function Header() {
                 </button>
                 {showUserMenu && (
                   <div className="user-menu">
+                    <Link to="/account" onClick={() => setShowUserMenu(false)}>My Account</Link>
                     <Link to="/orders" onClick={() => setShowUserMenu(false)}>My Orders</Link>
+                    <Link to="/wishlist" onClick={() => setShowUserMenu(false)}>Wishlist</Link>
                     <button onClick={() => { logout(); setShowUserMenu(false) }}>Logout</button>
                   </div>
                 )}

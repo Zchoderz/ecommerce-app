@@ -15,6 +15,8 @@ export const AppProvider = ({ children }) => {
   const [wishlist, setWishlist] = useState([])
   const [user, setUser] = useState(null)
   const [orders, setOrders] = useState([])
+  const [addresses, setAddresses] = useState([])
+  const [paymentMethods, setPaymentMethods] = useState([])
   const [toast, setToast] = useState(null)
 
   // Load cart and wishlist from localStorage on mount
@@ -23,11 +25,15 @@ export const AppProvider = ({ children }) => {
     const savedWishlist = localStorage.getItem('wishlist')
     const savedUser = localStorage.getItem('user')
     const savedOrders = localStorage.getItem('orders')
+    const savedAddresses = localStorage.getItem('addresses')
+    const savedPaymentMethods = localStorage.getItem('paymentMethods')
 
     if (savedCart) setCartItems(JSON.parse(savedCart))
     if (savedWishlist) setWishlist(JSON.parse(savedWishlist))
     if (savedUser) setUser(JSON.parse(savedUser))
     if (savedOrders) setOrders(JSON.parse(savedOrders))
+    if (savedAddresses) setAddresses(JSON.parse(savedAddresses))
+    if (savedPaymentMethods) setPaymentMethods(JSON.parse(savedPaymentMethods))
   }, [])
 
   // Save cart to localStorage whenever it changes
@@ -53,6 +59,16 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('orders', JSON.stringify(orders))
   }, [orders])
+
+  // Save addresses to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('addresses', JSON.stringify(addresses))
+  }, [addresses])
+
+  // Save payment methods to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('paymentMethods', JSON.stringify(paymentMethods))
+  }, [paymentMethods])
 
   const showToast = (message, type = 'success') => {
     if (!message) {
@@ -145,7 +161,9 @@ export const AppProvider = ({ children }) => {
       id: 1,
       name: 'John Doe',
       email: email,
-      avatar: 'https://ui-avatars.com/api/?name=John+Doe&background=6366f1&color=fff'
+      phone: '+1 234 567 8900',
+      avatar: 'https://ui-avatars.com/api/?name=John+Doe&background=6366f1&color=fff',
+      joinedDate: '2024-01-01'
     }
     setUser(mockUser)
     showToast('Welcome back!', 'success')
@@ -158,11 +176,77 @@ export const AppProvider = ({ children }) => {
       id: Date.now(),
       name: name,
       email: email,
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=fff`
+      phone: '',
+      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=6366f1&color=fff`,
+      joinedDate: new Date().toISOString().split('T')[0]
     }
     setUser(newUser)
     showToast('Account created successfully!', 'success')
     return true
+  }
+
+  const updateProfile = (profileData) => {
+    setUser({ ...user, ...profileData })
+    showToast('Profile updated successfully!', 'success')
+  }
+
+  const changePassword = (oldPassword, newPassword) => {
+    // Mock password change
+    showToast('Password changed successfully!', 'success')
+    return true
+  }
+
+  const addAddress = (addressData) => {
+    const newAddress = {
+      id: Date.now(),
+      ...addressData,
+      isDefault: addresses.length === 0
+    }
+    setAddresses([...addresses, newAddress])
+    showToast('Address added successfully!', 'success')
+  }
+
+  const updateAddress = (addressId, addressData) => {
+    setAddresses(addresses.map(addr => 
+      addr.id === addressId ? { ...addr, ...addressData } : addr
+    ))
+    showToast('Address updated successfully!', 'success')
+  }
+
+  const deleteAddress = (addressId) => {
+    setAddresses(addresses.filter(addr => addr.id !== addressId))
+    showToast('Address deleted successfully!', 'success')
+  }
+
+  const setDefaultAddress = (addressId) => {
+    setAddresses(addresses.map(addr => ({
+      ...addr,
+      isDefault: addr.id === addressId
+    })))
+    showToast('Default address updated!', 'success')
+  }
+
+  const addPaymentMethod = (paymentData) => {
+    const newPayment = {
+      id: Date.now(),
+      ...paymentData,
+      isDefault: paymentMethods.length === 0
+    }
+    setPaymentMethods([...paymentMethods, newPayment])
+    showToast('Payment method added successfully!', 'success')
+  }
+
+  const deletePaymentMethod = (paymentId) => {
+    setPaymentMethods(paymentMethods.filter(pm => pm.id !== paymentId))
+    showToast('Payment method deleted successfully!', 'success')
+  }
+
+  const setDefaultPaymentMethod = (paymentId) => {
+    setPaymentMethods(paymentMethods.map(pm => ({
+      ...pm,
+      isDefault: pm.id === paymentId
+    })))
+    showToast('Default payment method updated!', 'success')
   }
 
   const logout = () => {
@@ -202,6 +286,8 @@ export const AppProvider = ({ children }) => {
     wishlist,
     user,
     orders,
+    addresses,
+    paymentMethods,
     toast,
     addToCart,
     removeFromCart,
@@ -211,10 +297,19 @@ export const AppProvider = ({ children }) => {
     login,
     signup,
     logout,
+    updateProfile,
+    changePassword,
     placeOrder,
     getCartItemCount,
     getTotalPrice,
-    showToast
+    showToast,
+    addAddress,
+    updateAddress,
+    deleteAddress,
+    setDefaultAddress,
+    addPaymentMethod,
+    deletePaymentMethod,
+    setDefaultPaymentMethod
   }
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>

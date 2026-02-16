@@ -8,6 +8,7 @@ import Checkout from './components/Checkout'
 import Login from './components/Login'
 import Wishlist from './components/Wishlist'
 import OrderHistory from './components/OrderHistory'
+import Account from './components/Account'
 import Toast from './components/Toast'
 import { useApp } from './context/AppContext'
 
@@ -25,6 +26,7 @@ function AppContent() {
         <Route path="/login" element={<Login />} />
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/orders" element={<OrderHistory />} />
+        <Route path="/account" element={<Account />} />
       </Routes>
       {toast && <Toast toast={toast} />}
     </div>
